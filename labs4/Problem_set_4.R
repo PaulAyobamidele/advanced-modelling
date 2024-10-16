@@ -1,0 +1,136 @@
+# Problem set week 4
+# Exercise: Analyzing the ELP Data
+# 4.1 Load the 'ELP_full_length_frequency.csv' data into R and fit a regression model
+
+# HERE WE LOADED THE BROOM LIBRARY THAT ENABLES
+# US TO USE USEFUL FUNCTIONS SUCH AS 'GLANCE'
+# WE ALSO LOADED 'TIDYVERSE'
+library(broom)
+library(tidyverse)
+
+
+# HERE WE LOADED OUR DATA, USING READ.CSV FILE
+# WE SAVED THE DATA INTO A VARIABLE CALLED 'DATA'
+data <- read.csv("ELP_full_length_frequency.csv")
+
+
+# HERE WE VIEWED THE DATA USING THE VIEW() FUNCTION
+# WHICH ENABLES US TO SEE HOW THE DATAFRAME IS STRUCTURED
+View(data)
+
+
+
+# HERE WE FITTED A REGRESSION MODEL
+# HERE OUR DEPENDENT VARIABLE IS RESPONSE DURATION (RT)
+# RT IS MODELLED AS A FUNCTION OF LOG10_FREQUENCY AND LENGTH
+# WE SAVED THE MODEL INTO A VRAIBLE CALLED 'MODEL'
+model <- lm(RT ~ Log10Freq + length, data = data)
+
+
+# HERE WE PRINTED THE RESULT 'MODEL'
+model
+# where raw response durations (column: RT) are modeled as a function of log10 frequency and length.
+# 4.2 Check overall model performance using the glance function to see R-squared.
+
+
+# WE CHECKED THE MODEL PERFORMANCE PARTICULARLY THE R-SQUARED USING THE GLANCE()
+# WE ALSO CHECK THE OVERALL PERFORMANCE USING THE SUMMARY() TO SEE HOW THE MODEL
+# IS PERFORMING
+glance(model)
+summary(model)
+
+
+# THE R_SQUARED HERE IS GIVEN AS
+#  0.487
+
+
+
+# 4.3 Check the coefficients of the model
+
+# TO CHECK THE COEFFICIENT OF THE MODEL,
+# WE USED THE 'TIDY()' FUNCTION IN THE BROOM LIBRARY
+# WE PARSED IN THE "MODEL", INTO THE TIDY() AND
+# SELECT ALL TERMS AND PRINTED EACH ESTIMATE
+tidy(model) %>%
+    select(term, estimate)
+
+
+# 4.4 Check how well your model fits the normality and homoscedasticity assumptions
+# and discuss what you see.
+
+# TO TEST FOR NORMALITY AND HOMOSCEDASTICITY
+# WE FIRST SAVED THE RESIDUALS OF THE MODEL INTO A VARIABLE 'res'
+res <- residuals(model)
+
+# WE PLOTTED THE 'res',
+par(mfrow = c(1, 3))
+
+# HERE WE PLOTTED THE HISTOGRAM OF THE RESIDUALS
+hist(res)
+
+# HERE WE PLOTTED THE Q-Q PLOT OF THE RESIDUALS
+qqnorm(res)
+qqline(res)
+
+# HERE WE PLOTTED THE FITTED OR PREDICTED VALUES AGAINST THE
+# RESIDUALS, AND WE SET A HORIZONTAL LINE AT THE MARK res = 0
+# TO BETTER VISUALIZE HOW IT LOOKS
+plot(fitted(model), res)
+abline(h = 100, col = "red")
+
+# NORMALITY ASSUMPTION
+# WE SEE FROM THE HISTOGRAM THAT OUR RESIDUAL DATA IS TENDING TO
+# A POSITIVELY SKEWED DISTRIBUTION SUGGEST A NON-NORMAL
+# DISTRIBUTION
+
+# ALSO, IN THE Q-Q PLOT, THE DATA DOES NOT FULLY ALIGN TO THE STRAIGHT
+# LINE, DEVIATING SIGNIFICANTLY AT THE TOP.
+
+# SO OUR RESIDUALS ARE TENDING NOT TO BE NORMAL
+
+
+# HOMOSKEDACITY
+# THE GRAPH OF THE FITTED MODEL AGAINST THE RESIDUALS, DEFIES LOOKING
+# LIKE A BLOB, IT LOOKS LESS SPREAD AROUND THE RANGE OF THE DISTRIBUTION
+
+# THEREFORE WE CAN SAY THAT THE RESIDUALS TENDS TO FAILS THE
+# THE HOMOSCEDACITY TEST
+
+# 4.5 Fit another model where log(RT)
+# is modeled as a function of log10 frequency and length
+
+
+# HERE WE FITTED A NEW MODEL, AND WE PERFOMED A NON-LINEAR
+# TRANSFORMATION ON THE DEPENDENT VARIABLE 'RT', AND WE MODELLED
+# IT AGAINST THE 'LOG10FREQ', 'LENGTH'
+model_log <- lm(log(RT) ~ Log10Freq + length, data = data)
+
+# 4.6 Check again how well your model fits the normality
+# and homoscedasticity assumptions and discuss what you see.
+# Calculating residuals for the log model
+
+# HERE WE TOOK THE RESIDUALS AND SAVED TO THE VARIABLE NAME
+# res_log
+res_log <- residuals(model_log)
+
+# WE PLOTTED THE HISTOGRAM, QQ PLOT and PLOTTED THE FITTED MODEL_LOG
+# TO THE RESIDUALS
+par(mfrow = c(1, 3))
+hist(res_log, main = "Histogram of Log-Model Residuals", xlab = "Residuals")
+qqnorm(res_log)
+qqline(res_log)
+plot(fitted(model_log), res_log,
+    main = "Log-Model Residuals vs Fitted",
+    xlab = "Fitted values", ylab = "Residuals"
+)
+
+
+# NORMALITY TEST
+# THE HISTOGRAM SUGGEST A MORE EVENLY DISTRIBUTED RESIDUAL,
+# THE Q-Q PLOT HOWEVER, SHOWS SOME DEVIATIOPN
+
+# THE RESIDUALS SHOWS THAT IT TENDING TO BE ALIGN WITH THE NORMALITY ASSUMPTION
+
+
+# HOMOSKEDACITY
+# THE PLOT SHOWS THAT THE GRAPH FAILS THE ASSUMPTION OF HOMOSCKEDACITY
